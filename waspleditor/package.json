@@ -1,0 +1,50 @@
+{
+  "name": "waspleditorlocker",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev:frontend": "vite",
+    "dev:backend": "node server/index.js",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.7.1",
+    "@fortawesome/fontawesome-svg-core": "^6.7.1",
+    "@fortawesome/free-brands-svg-icons": "^6.7.1",
+    "@fortawesome/free-regular-svg-icons": "^6.7.1",
+    "@fortawesome/free-solid-svg-icons": "^6.7.1",
+    "@fortawesome/vue-fontawesome": "^3.0.8",
+    "@jsdawn/vue3-tinymce": "^2.0.4",
+    "@popperjs/core": "^2.11.8",
+    "axios": "^1.7.9",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^1.20.3",
+    "bootstrap": "^5.3.3",
+    "bootstrap-vue-next": "^0.26.7",
+    "concurrently": "^9.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.21.2",
+    "luxon": "^3.5.0",
+    "mongoose": "^8.0.0",
+    "papaparse": "^5.5.1",
+    "pinia": "^2.1.7",
+    "quill": "^2.0.3",
+    "tabulator-tables": "^6.3.0",
+    "uuid": "^11.0.3",
+    "validator": "^13.12.0",
+    "vue": "^3.4.38",
+    "vue-good-table-next": "^0.2.2",
+    "vue-router": "^4.2.5",
+    "vuedraggable": "^4.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "bootstrap-vue-3": "^0.5.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.3",
+    "vite": "^5.4.2"
+  }
+}

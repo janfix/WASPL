@@ -1,0 +1,50 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node Modules & Builds
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environnement et variables sensibles
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+secrets/
+
+# MongoDB Database (exclure les données persistantes)
+mongodb/
+
+# Docker (ajoute ces exclusions si tu ne veux pas tout versionner)
+.dockerignore
+docker-compose.override.yml
+
+# Dossiers et fichiers liés aux éditeurs
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Cache et fichiers temporaires
+.npm
+.yarn
+.pnpm
+.cache
+.tmp
+
+# Exclusion spécifique à Mac/Linux
+._*

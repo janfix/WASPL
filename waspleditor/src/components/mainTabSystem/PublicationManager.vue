@@ -1,0 +1,132 @@
+<template>
+<div class="Accordion-container">
+  <div class="accordion" id="PublicationCreator">
+
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="PublicationPresentation">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#PubPres"
+          aria-expanded="true" aria-controls="PubPres">
+          <h3> Discover the Publication Manager</h3>
+        </button>
+      </h2>
+      <div id="PubPres" class="accordion-collapse collapse show" aria-labelledby="PublicationPresentation"
+        data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+
+          <PublicationPresentation />
+
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#PubCreator"
+          aria-expanded="true" aria-controls="PubCreator">
+          <h3>Create a Publication</h3>
+        </button>
+      </h2>
+      <div id="PubCreator" class="accordion-collapse collapse " aria-labelledby="headingOne"
+        data-bs-parent="#PublicationCreator">
+
+        <div class="accordion-body">
+          <publicationCreator />
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#upcoming" aria-expanded="true" aria-controls="upcoming">
+        <h3>Publications List</h3>
+      </button>
+    </h2>
+    <div id="upcoming" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <div class="row mb-4">
+            <PublicationTable @publication-selected="fetchPublicationDetails" />        
+            
+        </div>
+        <div class="row">
+          <PublicationCard v-if="selectedPublication" :publication="selectedPublication" />
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import publicationCreator from '../publication/PublicationCreator.vue';
+import PublicationCard from '../publication/PublicationCard.vue';
+import PublicationPresentation from '../publication/PublicationPresentation.vue';
+import PublicationTable from '../publication/PublicationTable.vue';
+import axios from "axios";
+
+
+const selectedPublication = ref(null); // Publication actuellement sélectionnée
+
+async function fetchPublicationDetails(publicationId) {
+  const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  try {
+    const response = await axios.get(`${VITE_API_BASE_URL}/api/publications/${publicationId}`);
+    selectedPublication.value = response.data; // Charger les détails de la publication
+    console.log("DATA:",response.data)
+  } catch (error) {
+    console.error("Erreur lors de la récupération des détails de la publication :", error);
+  }
+}
+
+</script>
+
+<style scoped>
+
+
+.presentation {
+  margin-left: 20px;
+}
+
+.presentation h1 {
+  font-size: 1.6rem;
+}
+
+h3 {
+  font-size: 1.3rem;
+}
+
+.targetDefinition {
+  border: 2px solid gainsboro;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #f4ebfa;
+}
+
+.accordion-button {
+  background-color: #eeeacc !important;
+  /* Couleur de fond personnalisée */
+  color: rgb(82, 82, 85) !important;
+  /* Couleur du texte */
+  border: none;
+}
+
+.accordion-button:hover {
+  background-color: #e7e1a9 !important;
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: #fdf4b0 !important;
+  color: rgb(85, 82, 82) !important;
+}
+
+.accordion-button:focus {
+  box-shadow: none !important;
+}
+
+.Accordion-container{
+  border-left : 1px gainsboro solid;
+  border-radius: 5px;
+ padding:20px;
+  background-color: #F8F9FA!important;
+}
+</style>
