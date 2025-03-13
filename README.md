@@ -28,7 +28,7 @@ cd waspl
 ```
 
 ### **Set Up Environment Variables**
-Create a `.env` file at the root of the project and configure necessary variables (example values below):
+Create a `.env` file at the root of each application (waspleditor and wasplTestrunner) and configure necessary variables (example values below):
 ```ini
 MONGO_URI=mongodb://admin:password@waspl-mongodb:27017/waspldata?authSource=admin
 NODE_ENV=development
