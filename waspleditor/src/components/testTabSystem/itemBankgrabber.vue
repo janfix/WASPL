@@ -1,5 +1,5 @@
 <template>
-    <div class="card">
+    <div class="card itembankCard">
         <div class="card-header" >
             <div class="row">
                 <div class="col-9">
@@ -142,5 +142,16 @@ h4{
 
 .mainQ{
     font-size: 0.9rem;
+}
+
+.itembankCard{
+  position: fixed;
+  top: 50%;
+  left: 60%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border: 1px solid #ccc;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
 }
 </style>

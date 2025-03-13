@@ -148,7 +148,7 @@ export const useTestStore = defineStore("test", {
           metadata: {
             ...this.testData?.metadata,
             ...(updatedData.metadata || {}),
-            //LastModif: new Date().toISOString() // Mettre à jour seulement si nécessaire
+            LastModif: new Date().toISOString() // Mettre à jour seulement si nécessaire
           },
           settings: {
             ...this.testData?.settings,

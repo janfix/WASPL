@@ -1,5 +1,5 @@
 <template>
-  <div class="pages-container">
+  <div id="editor" class="pages-container">
     <div class="row">
       <div class="col">
         <button type="button" @click="addPage" class="btn TopPageBT TopAdd btn-sm">Add Page</button>
@@ -17,11 +17,11 @@
       </div>
     </div>
 
-    <div v-for="page in pages" :key="page.id" class="mb-4" :class="{ 'active-page': isPageActive(page) }">
+    <div v-for="(page, index)  in pages" :key="page.id" class="mb-4" :class="{ 'active-page': isPageActive(page) }">
       <div class="d-flex flex-column gap-2 pageGroup">
         <div class="row">
           <div class="col">
-            <h3>{{ page.label }}</h3>
+            <h3>Page {{ index + 1 }}</h3>
           </div>
           <div class="col">
             <div class="Page-actions">
@@ -47,6 +47,7 @@
                       <div class="interaction-type">{{ getInteractionType(child.id) }}</div>
                     </div>
                     <div class="col" style="text-align: right; margin-top: -15px!important">
+                      
                       <i class="fa-solid fa-pen-to-square editPageLabel" @click="enableEdit(child)"></i>
                       <span title="Delete Element!" class="delElement" @click.stop="deleteElement(child.id)">
                         <i class="fa-solid fa-xmark"></i>
@@ -72,6 +73,25 @@
         </draggable>
       </div>
     </div>
+
+    <div class="row">
+      <div class="col">
+        <button type="button" @click="addPage" class="btn TopPageBT TopAdd btn-sm">Add Page</button>
+      </div>
+      <div class="col" style="display: flex; justify-content: flex-end; align-items: center; margin-top:-20px">
+        <div class="icon-container" style="margin-right: 10px;">
+          <img title="Import Question from item collection" @click="$emit('toggle-item-bank')"
+            src="@/assets/Import2ItemLib.png" alt="import items" />
+        </div>
+        <div hidden class="icon-container">
+          <img title="Export All Questions to the item collection (except duplicates)"
+            @click="console.log('DISPLAY ITEM BANK WITH SELECTOR SYSTEM')" src="@/assets/Export2ItemLib.png"
+            alt="export items" />
+        </div>
+      </div>
+    </div>
+
+
   </div>
 </template>
 
@@ -135,16 +155,20 @@ const addPage = () => {
 const deletePage = (pageId) => {
   // Confirmer la suppression avec l'utilisateur
   if (confirm("Êtes-vous sûr de vouloir supprimer cette page ?")) {
-    // Appeler la méthode du store pour supprimer la page
-    store.deletePage(pageId);
+    // Trouver la page à supprimer
+    const pageIndex = store.testData.pages.findIndex(page => page.id === pageId);
+    if (pageIndex === -1) return; // Si la page n'existe pas, on arrête la fonction
 
-    // Si vous avez besoin de nettoyer les éléments associés à cette page, vous pouvez le faire ici
-    // Par exemple, supprimer tous les éléments qui appartiennent à cette page
-    store.testData.elements = store.testData.elements.filter(element => {
-      return !store.testData.pages.some(page => page.children.some(child => child.id === element.el_ID));
-    });
+    // Récupérer les IDs des éléments associés à cette page
+    const elementsToDelete = store.testData.pages[pageIndex].children.map(child => child.id);
 
-    // Sauvegarder les modifications dans le store
+    // Supprimer les éléments associés dans testData.elements
+    store.testData.elements = store.testData.elements.filter(el => !elementsToDelete.includes(el.el_ID));
+
+    // Supprimer la page de testData.pages
+    store.testData.pages.splice(pageIndex, 1);
+
+    console.log(`Page ${pageId} et ses éléments associés ont été supprimés.`);
     store.saveTestDataToDatabase();
   }
 };
@@ -243,6 +267,10 @@ h5 {
   border-radius: 5px;
   margin-left: -7px;
   padding: 10px;
+  height:1100px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #f9f9f9;  
 }
 
 .TopPageBT {
@@ -396,4 +424,18 @@ h5 {
   font-weight: bold;
   color: #f8fafc;
 }
+
+.gotoEditor{
+  margin-top: -15px;
+  margin-right: 10px;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.gotoEditor:hover{
+  color: green;
+  font-size: 1.2em;
+}
+
+
 </style>

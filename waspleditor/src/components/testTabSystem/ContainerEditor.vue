@@ -8,9 +8,9 @@
     </div>
 
 
-    <div class="col-md-9">
+    <div class="col-md-9 flexContainer">
       <itemBankGrabber v-if="ItemBGrab" @close="toggleItemBank"/>
-      <div v-else>
+      <div v-else class="editorBlock">
       <PreviewSection class="previewContainer" :element="currentPreviewElement" />
       <ElementEditor  :element="currentEditorElement" />
     </div>
@@ -65,4 +65,17 @@ const clearPreviewAndEditor = () => {
 const dynamicTop = ref(0);
 
 </script>
-<style></style>
+<style>
+/* .flexContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.editorBlock {
+  background-color: white;
+  padding: uto;
+  border: 1px solid #ccc;
+} */
+</style>

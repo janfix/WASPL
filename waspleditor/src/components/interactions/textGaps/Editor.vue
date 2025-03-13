@@ -13,7 +13,7 @@
             <label class="form-label">Element ID</label>
             <input type="text" class="form-control" v-model="selectedElement.el_ID" readonly />
           </div>
-          <div class="mb-3" v-show="selectedElement.isNewElement">
+          <div hidden class="mb-3" v-show="selectedElement.isNewElement">
             <label class="form-label">Type</label>
             <input type="text" class="form-control" v-model="selectedElement.el_Type" />
           </div>
