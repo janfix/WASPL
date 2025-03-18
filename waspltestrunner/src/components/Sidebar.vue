@@ -1,15 +1,12 @@
 <template>
   <div class="sidebar">
     <div class="fixedContainer">
-      <CountdownTimer 
+      <!-- <CountdownTimer 
         v-if="testData.settings && testData.settings.timeLimit"
         :duration="testData.duration"
         @time-up="$emit('time-up')"
         :stop-timer="stopTimer"
-      />
-      <div v-else>
-        <p>Chargement du test...</p>
-      </div>
+      /> -->
 
       <hr>
       <div v-if="testData.preset" class="Mode">{{ testData.preset }} mode</div>
@@ -31,7 +28,7 @@
 
 <script setup>
 import TestMap from "./TestMap.vue"
-import CountdownTimer from './CountdownTimer.vue';
+
 
 // Récupération des props
 const props = defineProps({
@@ -65,6 +62,7 @@ function handleNavigateToPage(index) {
 
 <style scoped>
 .sidebar {
+  margin-top: 120px;
   background-color: #F8F9FA;
   height: 100%;
   left: 0;

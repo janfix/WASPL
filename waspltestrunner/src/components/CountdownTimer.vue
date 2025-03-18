@@ -72,6 +72,10 @@ onUnmounted(() => {
 
 <style scoped>
 .countdown-timer {
+  margin-top: 20px;
+  margin-left:auto;
+  margin-right: auto;
+  width:75%;
   border : 1px gainsboro solid;
   border-radius: 5px;
   font-weight: bold;

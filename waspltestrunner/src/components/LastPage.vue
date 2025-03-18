@@ -4,6 +4,7 @@
         <p>Your answers have been sent! Thank you for your participation.</p>
     </div>
     <hr>
+   
     <div v-if="testData.settings && testData.settings.directScore_FB" class="InstantReport">
         <h2>Instant report</h2>
         <p>The open ended question are corrected by an AI.
@@ -107,9 +108,10 @@
                 </div>
             </div>
         </div>
+        <hr>
     </div>
-    <hr>
-    <div class="AIfeedback">
+   
+<!--     <div class="AIfeedback">
         <p>This component uses a local AI to generate:</p>
         <h3>AI comment</h3>
         <ul>
@@ -120,7 +122,7 @@
         Here are some tips to do better.
         <li>Cheers</li>
         <li>Congratulations</li>
-    </div>
+    </div> -->
 </template>
 
 <script setup>

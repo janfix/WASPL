@@ -147,9 +147,9 @@
             <select id="Tpath" class="form-select" v-model="newTest.progression" title="Test Path"
               aria-label="progression">
               <option value="linear">Linear</option>
-              <option value="conditional">Conditional</option>
-              <option value="chosen">Chosen</option>
-              <option value="adaptive">Adaptive</option>
+              <option disabled value="conditional">Conditional</option>
+              <option disabled value="chosen">Chosen</option>
+              <option disabled value="adaptive">Adaptive</option>
             </select>
             <label for="Tpath">Test Progression</label>
           </div>
@@ -160,11 +160,11 @@
           <div class="form-floating">
             <select id="Tnav" class="form-select" v-model="newTest.navigation" title="Test Navigation">
               <option value="backPossible">Browsing back is possible</option>
-              <option value="backReadOnly">Browsing back-read only</option>
-              <option value="BackforEmptys">
+              <option disabled value="backReadOnly">Browsing back-read only</option>
+              <option disabled value="BackforEmptys">
                 Browsing back-only for empty question (skip must be allowed)
               </option>
-              <option value="noBack">Browsing back is not allowed</option>
+              <option disabled  value="noBack">Browsing back is not allowed</option>
             </select>
             <label for="Tnav">Test Navigation</label>
           </div>

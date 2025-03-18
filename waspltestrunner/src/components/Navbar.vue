@@ -2,7 +2,9 @@
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
       <img src="../assets/waspl.png" width="30px" style="margin-right: 10px;">
-      <router-link class="navbar-brand" to="/">WASPL</router-link>
+      <router-link class="navbar-brand" to="/">
+        
+      </router-link>
       <button
         class="navbar-toggler"
         type="button"

@@ -1,7 +1,7 @@
 <template>
     <div class="card-header">
       <div class="row">
-        <div class="col">
+        <div class="col"><div class="orderNumber">{{numOrder}}</div>
          
         </div>
         <div class="col badgeTypePosition">
@@ -15,6 +15,10 @@
   defineProps({
     elementType: {
       type: String,
+      required: true
+    },
+    numOrder: {
+      type: Number,
       required: true
     }
   });
@@ -30,5 +34,13 @@
     border : 1px solid gainsboro
   }
 
+  .orderNumber{
+    border:1px solid gainsboro;
+    width: fit-content;
+    border-radius: 10px;
+    padding-left : 10px;
+    padding-right : 10px;
+    background-color: #E5FC1A!important;
+  }
 
   </style>

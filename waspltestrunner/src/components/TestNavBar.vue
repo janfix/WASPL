@@ -1,9 +1,10 @@
 <template>
   <div class='testHeader'>
     <div class="row p-3">
-      <div class="col-2"> 
-        <img width="40px" src="../assets/waspl.png"><br>
-        <span class="wasplLogo">WASPL</span>
+      <div class="col-2" style="text-align: center;"> 
+        <img width="100px" src="../assets/waspl.png"><br>
+       
+
       </div>
       <div class="col-10">
         <TestMap 
@@ -19,6 +20,7 @@
 
 <script setup>
 import TestMap from './TestMap.vue';
+
 
 // Déclaration des props
 const props = defineProps({
@@ -39,8 +41,10 @@ function handleNavigateToPage(index) {
 
 <style scoped>
 .testHeader {
+  z-index: 1000;
+  position:fixed;
   width: 100%;
-  background-color: tomato;
+  background-color:#F8F9FA
 }
 
 .wasplLogo {

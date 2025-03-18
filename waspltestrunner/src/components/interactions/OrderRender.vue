@@ -3,7 +3,11 @@
     <hr>
     <div v-if="selectedElement" class="card">
       <!-- Utilisation du composant PreviewHeader -->
-      <cardHeader :elementType="selectedElement.el_Type" :mode="'Preview'" />
+      <cardHeader 
+      :numOrder="getQuestionNumber()"
+      :elementType="selectedElement.el_Type" 
+      :mode="'Preview'" 
+      />
 
       <div class="card-body">
         <div class="mb-2">
@@ -80,6 +84,7 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  questionIndexMap: Array // 🔥 Ajout de la table des numéros
 });
 
 const selectedElement = computed(() => props.question);
@@ -91,6 +96,18 @@ const showReport = ref(false);
 const token = localStorage.getItem('token'); // Récupérer le token depuis le stockage local
 const decodedToken = decodeToken(token);
 const userId = decodedToken?._id || decodedToken?.sub;
+
+
+// Récupère le numéro de la question depuis questionIndexMap
+const getQuestionNumber = () => {
+  if (!props.questionIndexMap || !Array.isArray(props.questionIndexMap)) {
+    console.error("❌ questionIndexMap est indéfini ou n'est pas un tableau.");
+    return "N/A";
+  }
+
+  const match = props.questionIndexMap.find(q => q.id === props.question.el_ID);
+  return match ? match.number : "N/A"; 
+};
 
 
 const results = ref({
@@ -236,7 +253,7 @@ function decodeToken(token) {
 <style scoped>
 .label-item {
   padding: 5px;
-  width: fit-content;
+ 
   border: 1px solid #ccc;
   margin-bottom: 5px;
   background-color: #f9f9f9;

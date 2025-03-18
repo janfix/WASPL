@@ -183,8 +183,8 @@ app.post('/api/results', auth, async (req, res) => {
 });
 
 app.post("/api/sessions/start", auth, async (req, res) => {
-  console.log("🔹 Route `/api/sessions/start` atteinte !");
-  console.log("📌 Données reçues :", req.body);
+  //console.log("🔹 Route `/api/sessions/start` atteinte !");
+  //console.log("📌 Données reçues :", req.body);
   
   try {
     const {studentId,testId, publicationId, groupId } = req.body;
@@ -212,6 +212,7 @@ app.post("/api/sessions/start", auth, async (req, res) => {
 });
 
 app.post("/api/sessions/end", auth, async (req, res) => {
+  console.log("api/sessions/end REACHED!!!!")
   try {
     const { sessionId, abandoned } = req.body; // ✅ On récupère l'ID de session et si l'étudiant a abandonné
 

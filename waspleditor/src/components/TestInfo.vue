@@ -18,7 +18,7 @@
         </span>
         <h2>
           <input type="text" v-model="testInfo.title" class="edit-input" placeholder="Enter title"
-            @input="updateTestData({ title: testInfo.title })" />
+            @blur="updateTestData({ title: testInfo.title })" />
         </h2>
       </div>
 
@@ -37,7 +37,7 @@
         {{ testInfo.Description || "No description available" }}
       </p>
       <textarea v-else v-model="testInfo.Description" class="edit-textarea" placeholder="Enter description"
-        @input="updateTestData({ Description: testInfo.Description })"></textarea>
+        @blur="updateTestData({ Description: testInfo.Description })"></textarea>
     </div>
 
     <div class="accordion" id="accordionParameters">
@@ -224,12 +224,12 @@
                 </div>
 
 
-                <div class="form-check form-switch">
+                <div hidden class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" id="settingProgressBar"
                     @change="updateTestData({ settings: testInfo.settings })" v-model="testInfo.settings.progressBar">
                   <label class="form-check-label" for="settingProgressBar">Progress bar</label>
                 </div>
-                <div class="form-check form-switch">
+                <div hidden class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" id="settingNavigationPanel"
                     @change="updateTestData({ settings: testInfo.settings })"
                     v-model="testInfo.settings.NavigationPanel">
@@ -256,9 +256,9 @@
                   <input class="form-check-input" type="checkbox" id="settingDirectScore"
                     @change="updateTestData({ settings: testInfo.settings })"
                     v-model="testInfo.settings.directScore_FB">
-                  <label class="form-check-label" for="settingDirectScore">Immediate score</label>
+                  <label class="form-check-label" for="settingDirectScore">Final score report</label>
                 </div>
-                <div class="form-check form-switch">
+                <div hidden class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" id="settingCountDown"
                     @change="updateTestData({ settings: testInfo.settings })" v-model="testInfo.settings.countDown">
                   <label class="form-check-label" for="settingCountDown">Count down</label>
@@ -272,6 +272,11 @@
                   <input class="form-check-input" type="checkbox" id="settingSkip"
                     @change="updateTestData({ settings: testInfo.settings })" v-model="testInfo.settings.skip">
                   <label class="form-check-label" for="settingSkip">Skip is allowed</label>
+                </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="AICorrection"
+                    @change="updateTestData({ settings: testInfo.settings })" v-model="testInfo.settings.AICorr">
+                  <label class="form-check-label" for="AICorrection">AI Correction</label>
                 </div>
               </div>
             </div>
@@ -358,21 +363,22 @@ const updateTestData = (data) => {
 let isUpdating = false;
 
 watch(
-  () => testInfo.value,
+  () => ({ ...testInfo.value }), // Clone pour éviter de modifier directement l'objet
   (newVal, oldVal) => {
     if (isUpdating) return;
     isUpdating = true;
 
     if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
-      console.log('Mise à jour détectée :', newVal);
+      console.log('📝 Mise à jour détectée :', newVal);
 
-      store.updateTestData(newVal); // Mise à jour locale et sauvegarde
+      store.updateTestData({ ...newVal }); // Mise à jour du store
     }
 
-    isUpdating = false;
+    setTimeout(() => { isUpdating = false; }, 100); // Petit délai pour éviter les boucles rapides
   },
-  { deep: true }
+  { deep: true, immediate: true }
 );
+
 
 
 

@@ -2,7 +2,10 @@
   <hr>
   <div class="preview-section">
     <div class="card">
-      <cardHeader :elementType="question.el_Type" />
+      <cardHeader 
+        :elementType="question.el_Type" 
+        :numOrder="getQuestionNumber()" 
+      />
       <div class="card-body">
 
         <div class="mb-2">
@@ -85,9 +88,22 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  questionIndexMap: Array // 🔥 Ajout de la table des numéros
 });
 
 const selectedElement = computed(() => props.question);
+
+// Récupère le numéro de la question depuis questionIndexMap
+const getQuestionNumber = () => {
+  if (!props.questionIndexMap || !Array.isArray(props.questionIndexMap)) {
+    console.error("❌ questionIndexMap est indéfini ou n'est pas un tableau.");
+    return "N/A";
+  }
+
+  const match = props.questionIndexMap.find(q => q.id === props.question.el_ID);
+  return match ? match.number : "N/A"; 
+};
+
 
 // Variable pour stocker les réponses de l'utilisateur
 const studentAnswers = ref('');
@@ -394,7 +410,7 @@ onMounted(() => {
 
 .card-header {
   background-color: #426C9C;
-  color: white
+  color: black
 }
 
 ;

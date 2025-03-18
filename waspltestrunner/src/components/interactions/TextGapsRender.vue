@@ -2,7 +2,10 @@
   <div class="preview-section">
     <hr>
     <div v-if="selectedElement" class="card">
-      <cardHeader  :elementType="selectedElement.el_Type" :mode="'Preview'" />
+      <cardHeader  
+        :numOrder="getQuestionNumber()"
+        :elementType="selectedElement.el_Type" 
+        :mode="'Preview'" />
       <div class="card-body">
         <div class="mb-2">
           <h3>{{ selectedElement.el_Text }}</h3>
@@ -153,8 +156,20 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  questionIndexMap: Array // 🔥 Ajout de la table des numéros
 });
 const selectedElement = computed(() => props.question);
+
+// Récupère le numéro de la question depuis questionIndexMap
+const getQuestionNumber = () => {
+  if (!props.questionIndexMap || !Array.isArray(props.questionIndexMap)) {
+    console.error("❌ questionIndexMap est indéfini ou n'est pas un tableau.");
+    return "N/A";
+  }
+
+  const match = props.questionIndexMap.find(q => q.id === props.question.el_ID);
+  return match ? match.number : "N/A"; 
+};
 
 const gapsedText = computed(() => props.question?.el_GapsedText || '');
 
@@ -385,7 +400,7 @@ function decodeToken(token) {
 <style scoped>
 .card-header {
   background-color: #426C9C;
-  color: white;
+  color: black;
 }
 
 .quill-editor {

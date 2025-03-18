@@ -1,5 +1,4 @@
 <template>
-  <div class="testMapLabel">test map</div>
   <div class="test-map">
     <div 
       class="page" 
@@ -9,7 +8,7 @@
       @click="navigateToPage(pageIndex)"
       >
       
-      <h3>{{ page.label }}</h3>
+      <h3>Page {{pageIndex+1}}</h3>
 
       <div class="elements">
         <div 
@@ -95,6 +94,9 @@ const getElementOrder = (elementId) => {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  width: fit-content;
+ /*  border: 1px gainsboro solid; 
+  border-radius: 5px;*/
 }
 
 .page {
@@ -153,11 +155,6 @@ const getElementOrder = (elementId) => {
   text-align: center;
 }
 
-.test-map {
-  width: fit-content;
-  border: 1px gainsboro solid;
-  border-radius: 5px;
-}
 
 .testMapLabel {
   display: none;

@@ -1,5 +1,5 @@
 <template>
-  <div class="interaction-message">
+  <div class="interaction-message container">
     <hr>
     <h3>{{ question.el_Text }}</h3>
     <div v-html="question.el_RichText"></div>
