@@ -1,13 +1,13 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { BNavbar, BNavbarBrand, BNavbarNav } from 'bootstrap-vue-next';
+import { BNavbar, BNavbarBrand, BNavbarNav} from 'bootstrap-vue-next';
 
 import 'tabulator-tables/dist/css/tabulator_bootstrap5.min.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
 import 'bootstrap-vue-next/dist/bootstrap-vue-next.css';
 import router from './router'
-//import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue-3/dist/bootstrap-vue-3.css'
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faUser, faEdit, faTrash, faPlus, faPlusCircle } from '@fortawesome/free-solid-svg-icons'; // Import des icônes spécifiques
@@ -30,6 +30,7 @@ const pinia = createPinia()
 // Enregistrer les composants globalement
 app.component('BNavbar', BNavbar);
 app.component('BNavbarBrand', BNavbarBrand);
+app.component('BNavbarNav', BNavbarNav); // Ajoutez ce composant aussi si vous l'utilisez
 app.component('font-awesome-icon', FontAwesomeIcon);
 
 app.use(router)

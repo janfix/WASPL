@@ -15,12 +15,12 @@
 </button>
  </div>
     <hr>
-    <button style="margin-left:10px; margin-right: 10px;" @click="downloadJSON" class="btn btn-success mb-3">
-      Télécharger les résultats (JSON)
+    <button style="margin-left:10px; margin-right: 10px;" @click="handleDownloadJSON" class="btn btn-success mb-3">
+      Download results (JSON)
     </button>
 
-    <button @click="downloadCSV" class="btn btn-warning mb-3">
-  Télécharger les résultats (CSV)
+    <button @click="handleDownloadCSV" class="btn btn-warning mb-3">
+      Download results (CSV)
 </button>
 
     <table class="table table-bordered" v-if="latestResults.length > 0">
@@ -61,10 +61,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import axios from "axios";
-
-
+import { downloadJSON, downloadCSV } from "@/utils/downloadUtils";
 
 const props = defineProps({
   publication: {
@@ -78,36 +77,35 @@ const studentNames = ref({});
 const aiProcessing = ref(false);
 const sessionData = ref([]);
 const studentAttemptCount = ref({});
-
-
-
-const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-// ✅ Récupération des résultats de la publication
-
-
 const testDetails = ref(null);
 const hasShortAnswers = ref(false);
 
+const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const handleDownloadJSON = () => {
+  downloadJSON(props.publication, sessionData.value, studentNames.value, studentAttemptCount.value, results.value, latestResults.value);
+};
+
+const handleDownloadCSV = () => {
+  downloadCSV(props.publication, studentNames.value, studentAttemptCount.value, latestResults.value);
+};
+
+// ✅ Fonction pour récupérer les détails du test
 const fetchTest = async () => {
+  if (!props.publication.testId.value) return;
   try {
-    const apiUrl = `${VITE_API_BASE_URL}/api/tests/${props.publication.testId}`;
+    const apiUrl = `${VITE_API_BASE_URL}/api/tests/${props.publication.testId.value}`;
     const response = await axios.get(apiUrl);
     testDetails.value = response.data;
-
-    // Vérifier si le test contient des questions de type 'shortAnswer'
     hasShortAnswers.value = testDetails.value.questions.some(q => q.type === "shortAnswer");
-
   } catch (error) {
     console.error("❌ Erreur lors de la récupération du test :", error);
   }
 };
 
-const shortAnswerResponses = computed(() => {
-  return latestResults.value.filter(response => response.type === "shortAnswer");
-});
-
-
+// ✅ Fonction pour récupérer les résultats de la publication
 const fetchResults = async () => {
+  if (!props.publication._id) return;
   try {
     const apiUrl = `${VITE_API_BASE_URL}/api/results/publication/${props.publication._id}`;
     const response = await axios.get(apiUrl);
@@ -121,10 +119,10 @@ const fetchResults = async () => {
   }
 };
 
-// ✅ Récupération des noms des étudiants
+// ✅ Fonction pour récupérer les noms des étudiants
 const fetchStudentNames = async () => {
   try {
-    const studentIds = [...new Set(results.value.map((r) => r.studentId))];
+    const studentIds = [...new Set(results.value.map(r => r.studentId))];
     if (studentIds.length === 0) return;
     const response = await axios.post(`${VITE_API_BASE_URL}/api/students/getNames`, { studentIds });
     studentNames.value = response.data;
@@ -133,34 +131,31 @@ const fetchStudentNames = async () => {
   }
 };
 
-// Récupération des données des étudiants
+// ✅ Fonction pour récupérer les sessions des étudiants
 const fetchStudentSessions = async () => {
+  if (!props.publication._id) return [];
   try {
     const response = await axios.get(
       `${VITE_API_BASE_URL}/api/publications/${props.publication._id}/student-sessions`
     );
-    return response.data; // Renvoie les données
+    return response.data;
   } catch (error) {
     console.error("❌ Error fetching student sessions:", error);
     return [];
   }
 };
 
-
-
+// ✅ Fonction pour logguer les sessions des étudiants
 const fetchAndLogStudentSessions = async () => {
   sessionData.value = await fetchStudentSessions();
-
-  // Construire l'objet associant `studentID` à `connectionNumber`
   studentAttemptCount.value = sessionData.value.reduce((acc, session) => {
     acc[session.studentID] = session.connectionNumber;
     return acc;
   }, {});
-
   console.log("Tentatives par étudiant :", studentAttemptCount.value);
 };
 
-// ✅ Filtrer pour garder uniquement la dernière tentative de chaque étudiant
+// ✅ Calcul des derniers résultats de chaque étudiant
 const latestResults = computed(() => {
   const latestAttempts = {};
   results.value.forEach((attempt) => {
@@ -181,116 +176,36 @@ const latestResults = computed(() => {
   );
 });
 
-// ✅ Trouver la première occurrence d'un étudiant dans la liste des résultats
+// ✅ Trouver la première occurrence d'un étudiant dans les résultats
 const firstOccurrenceIndex = (userId) => {
   return latestResults.value.findIndex(r => r.userId === userId);
 };
 
-// ✅ Lancer la correction IA
-const launchAICorrection = async () => {
-  if (!hasShortAnswers.value) {
-    alert("Aucune question à réponse ouverte trouvée dans ce test.");
-    return;
-  }
-
-  aiProcessing.value = true;
-
-  try {
-    const response = await axios.post(`${VITE_API_BASE_URL}/api/ai/correct`, {
-      responses: shortAnswerResponses.value
-    });
-
-    console.log("✅ Correction IA terminée :", response.data);
-    alert("Correction IA terminée avec succès !");
-
-  } catch (error) {
-    console.error("❌ Erreur lors de la correction IA :", error);
-    alert("Erreur lors de la correction IA.");
-  }
-
-  aiProcessing.value = false;
-};
 
 
 
-const downloadJSON = () => {
-  // Construire l'objet avec toutes les données
-  const dataToDownload = {
-    publicationId: props.publication._id,
-    students: sessionData.value.map(student => ({
-      studentID: student.studentID,
-      name: studentNames.value[student.studentID] || "Étudiant inconnu",
-      attempts: studentAttemptCount.value[student.studentID] || 0,
-    })),
-    results: results.value,
-    latestResults: latestResults.value
-  };
-
-  // Convertir en JSON
-  const jsonData = JSON.stringify(dataToDownload, null, 2);
-
-  // Créer un blob et un lien de téléchargement
-  const blob = new Blob([jsonData], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  
-  // Créer un élément <a> pour télécharger le fichier
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `publication_${props.publication._id}_results.json`;
-  document.body.appendChild(a);
-  a.click();
-
-  // Nettoyer l'URL après le téléchargement
-  URL.revokeObjectURL(url);
-};
 
 
-const downloadCSV = () => {
-  // Construire les en-têtes du CSV
-  const headers = ["Student ID", "Student Name", "Attempts", "Question Label", "Selected Answers", "Score"];
+// ✅ Surveiller les changements de publication et recharger les résultats
+watch(
+  () => props.publication,
+  async () => {
+    console.log("🔄 Mise à jour de PublicationResult avec une nouvelle publication !");
+    await fetchResults(); // Récupère les résultats des tests
+    await fetchAndLogStudentSessions(); // Récupère les tentatives des étudiants
+    await fetchTest(); // Récupère les détails du test
+  },
+  { deep: true, immediate: true }
+);
 
-  // Construire les lignes des résultats
-  const rows = latestResults.value.map(response => {
-    const studentName = studentNames.value[response.userId] || "Étudiant inconnu";
-    const attempts = studentAttemptCount.value[response.userId] || 0;
-    const selectedAnswers = response.selectedLabels.join(", ") || response.rawOpenAnswer || response.gapsAnswers.join(", ");
-    
-    return [
-      response.userId,
-      studentName,
-      attempts,
-      response.questionLabel,
-      selectedAnswers,
-      response.score
-    ];
-  });
-
-  // Générer le contenu CSV
-  let csvContent = "data:text/csv;charset=utf-8," + 
-    headers.join(";") + "\n" + // En-têtes
-    rows.map(row => row.join(";")).join("\n"); // Lignes
-
-  // Encoder en URI
-  const encodedUri = encodeURI(csvContent);
-
-  // Créer un élément de téléchargement
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `publication_${props.publication._id}_results.csv`);
-  document.body.appendChild(link);
-  link.click();
-
-  // Nettoyage
-  document.body.removeChild(link);
-};
-
-
+// ✅ Charger les résultats au montage
 onMounted(async () => {
-  await fetchResults(); // Récupère les résultats des tests
-  await fetchAndLogStudentSessions(); // Récupère les tentatives des étudiants
-  await fetchTest(); // Récupère les détails du test
+  await fetchResults();
+  await fetchAndLogStudentSessions();
+  await fetchTest();
 });
 </script>
+
 
 <style scoped>
 .table {

@@ -71,7 +71,11 @@
         </div>
       </div>
 
-      <cardFooterLearningMode :showReport="showReport" :submitAnswers="showReportOnSubmit" :closeReport="closeReport"
+      <cardFooterLearningMode 
+        v-if="(testData.preset) !== 'exam'"
+        :showReport="showReport" 
+        :submitAnswers="showReportOnSubmit" 
+        :closeReport="closeReport"
         :resetSelections="resetSelections" />
 
     </div>

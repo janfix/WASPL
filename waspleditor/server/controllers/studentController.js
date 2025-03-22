@@ -101,21 +101,54 @@ export const createStudent = async (req, res) => {
   
   // READ : Récupérer tous les studentes ou ceux d’un créateur spécifique
   export const getStudents = async (req, res) => {
-    const { groupId } = req.query; // Récupérer groupId depuis la requête
-  
+    console.log("Requête pour récupérer les étudiants");
+
+    let { groupId, page, size } = req.query;
+    console.log(groupId)
+    console.log(size)
+
     try {
-      let filter = {};
-      if (groupId) {
-        filter.group = groupId; // Filtrer par groupe
-      }
-  
-      const students = await Student.find(filter); // Appliquer les filtres
-      res.status(200).json(students);
+        let filter = {};
+
+        // Vérifier si groupId est fourni et valide
+        if (groupId && groupId !== "null" && groupId !== "undefined") {
+            filter.group = groupId;
+        } else {
+            console.log("groupId non défini, récupération de tous les étudiants.");
+        }
+
+        // S'assurer que page et size sont bien des nombres valides
+        const pageNumber = parseInt(page, 10) || 1;
+        const pageSize = parseInt(size, 10) || 20; // Défaut à 20 si non fourni
+        let studentsQuery = Student.find(filter);
+
+        // Appliquer la pagination seulement si page et size sont définis
+        /* if (!isNaN(pageNumber) && !isNaN(pageSize) && pageNumber > 0 && pageSize > 0) {
+            studentsQuery = studentsQuery.skip((pageNumber - 1) * pageSize).limit(pageSize);
+        } */
+
+        // Exécuter la requête
+        const students = await studentsQuery.exec();
+        const totalStudents = await Student.countDocuments(filter);
+
+        console.log("Nombre total d'étudiants :", totalStudents);
+        console.log("Taille de page demandée :", pageSize);
+        console.log("Nombre total de pages calculé :", Math.ceil(totalStudents / pageSize));
+        console.log("Nombre total de pages calculé :", typeof totalStudents, typeof pageSize);
+
+        res.status(200).json({
+            students,
+            totalPages:  pageSize > 0 ? Math.max(1, Math.ceil(totalStudents / pageSize)) : 1,
+            currentPage: pageSize > 0 ? pageNumber : 1,
+            totalStudents,
+        });
     } catch (error) {
-      console.error("Erreur lors de la récupération des étudiants :", error.message);
-      res.status(400).json({ error: error.message });
+        console.error("Erreur lors de la récupération des étudiants :", error.message);
+        res.status(500).json({ error: error.message });
     }
-  };
+};
+
+
   
   
   

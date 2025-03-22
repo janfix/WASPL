@@ -110,24 +110,11 @@
         </div>
         <hr>
     </div>
-   
-<!--     <div class="AIfeedback">
-        <p>This component uses a local AI to generate:</p>
-        <h3>AI comment</h3>
-        <ul>
-            <li>It is a comment on the performance:</li>
-            <li>Constructive criticism</li>
-        </ul>
-        <h3>AI advice and greetings</h3>
-        Here are some tips to do better.
-        <li>Cheers</li>
-        <li>Congratulations</li>
-    </div> -->
-</template>
+  </template>
 
 <script setup>
 import { useResponsesStore } from '../stores/useResponsesStore.js';
-import { ref, watch, computed, nextTick } from 'vue';
+import { ref, watch, computed, nextTick, onMounted } from 'vue';
 
 const correctionPrompt = ref("")
 const showCorrection = ref(false);
@@ -143,7 +130,6 @@ const props = defineProps({
         required: true,
     },
 });
-const toto = "toto";
 const token = localStorage.getItem('token'); // Récupérer le token depuis le stockage local
 const decodedToken = decodeToken(token);
 const userId = decodedToken?._id || decodedToken?.sub;
@@ -167,6 +153,10 @@ const getTotalQScoreClass = computed(() => {
     if (totalQScore.value > 0) return "bg-green scoreContainerLarge";
     if (totalQScore.value < 0) return "bg-red scoreContainerLarge";
     return ""; // Pas de classe si le score est neutre
+});
+
+onMounted(() => {
+  resetResults();
 });
 
 //Identify Openended Question
@@ -234,6 +224,18 @@ const calculateTotalMaxScore = () => {
 // Calcul initial et mise à jour automatique
 calculateTotalScore();
 calculateTotalMaxScore();
+
+
+const resetResults = () => {
+  results.value = {
+    userId: userId,
+    content: "todo",
+    timestamp: new Date().toISOString(),
+    score: 0,
+    error: 0,
+    correction: []
+  };
+};
 
 watch(allAnswers, () => {
     setTimeout(() => {

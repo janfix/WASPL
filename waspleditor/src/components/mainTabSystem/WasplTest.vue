@@ -83,8 +83,7 @@ const toggleTestForm = () => {
 };
 
 const checkTest = () => {
-  console.log(store.testData.ID)
-  return store.testData.ID != false;
+  return !!store.testData?.ID; 
 };
 
 const toggleImportTest = () => {
@@ -100,7 +99,7 @@ const closeImportForm = () => {
   showImportTest.value = false;
 };
 
-const currentTestID = computed(() => store.testData.ID || null);
+const currentTestID = computed(() => store.testData?.ID || null);
 
 // Handle editing a test
 const editTest = (testData) => {
@@ -188,7 +187,7 @@ main {
 }
 
 .allContainer {
-  margin-top: 5px;
+  margin-top: 5px!important;
   ;
   border: 1px gainsboro solid;
   border-radius: 5px;

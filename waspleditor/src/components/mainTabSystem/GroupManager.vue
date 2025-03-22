@@ -25,19 +25,25 @@ onMounted(() => {
 
 // Rafraîchir la liste des groupes
 async function refreshGroupList() {
-
   const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-    try {
-        const response = await axios.get(`${VITE_API_BASE_URL}/api/groups`);
-        groupListData.value = response.data; // Met à jour la liste des groupes
-        selectedGroupForEdit.value = null;  // Ferme l'éditeur après mise à jour
-        //alert("Group list refreshed!");
-    } catch (error) {
-        console.error("Error refreshing group list:", error);
-        alert("Failed to refresh group list.");
+  try {
+    const response = await axios.get(`${VITE_API_BASE_URL}/api/groups`);
+
+    if (!Array.isArray(response.data.groups)) {
+      console.error("Erreur: la réponse API ne contient pas un tableau", response.data);
+      return;
     }
+
+    groupListData.value = response.data.groups; // Prendre uniquement le tableau
+    selectedGroupForEdit.value = null;  // Ferme l'éditeur après mise à jour
+
+  } catch (error) {
+    console.error("Error refreshing group list:", error);
+    alert("Failed to refresh group list.");
+  }
 }
+
 
 // Ouvrir l'éditeur de groupe
 function showGroupCardEditor(group) {
@@ -108,7 +114,7 @@ const toggleshowGroupCreator = () => {
 
 
 
-<style>
+<style scoped>
 .tab {
   border-left: 1px gainsboro solid;
   background-color: #F8F9FA;
@@ -168,6 +174,19 @@ const toggleshowGroupCreator = () => {
 .ActionCreator-btn:hover {
   background-color: #bac466;
   color:white;
+}
+
+.btn-Success {
+  background-color: #5cb85c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  margin-bottom: 10px;
+  margin-left: 2px;
+  cursor: pointer !important;
+  width: 200px !important;
+  
 }
 </style>
   

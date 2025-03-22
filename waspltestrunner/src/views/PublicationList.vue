@@ -39,10 +39,11 @@
     <!-- Message de bienvenue -->
     <h2>Welcome, {{ studentName }}!</h2>
     <p class="text-muted">Here are your available tasks:</p>
+    
 
     <!-- Liste des publications -->
     <ul class="list-group">
-      <li v-for="publication in publications" :key="publication._id"
+      <li v-for="publication in publications.data" :key="publication._id"
         class="list-group-item d-flex justify-content-between align-items-center">
         <div>
           <strong>{{ publication.publicationName }}</strong>
@@ -50,10 +51,18 @@
           <small>Available from: {{ formatDate(publication.startingDate) }}</small>
           <br />
           <small>Until: {{ formatDate(publication.endDate) }}</small>
+          - <span v-if="publication.access=='unique'" >Attention, you have only one attempt for this test!</span>
+          
         </div>
-        <button class="btn btn-primary btn-sm" :disabled="!isOpen(publication)" @click="goToTest(publication)">
+        <button 
+          class="btn btn-primary btn-sm" 
+          :disabled="AccessControl(publication).disabled"
+          @click="goToTest(publication)"
+          :title="AccessControl(publication).message"
+          >
           Start Now
         </button>
+        
       </li>
     </ul>
 
@@ -67,6 +76,8 @@
     <hr>
     <button hidden class="btn btn-danger" @click="handleLogout">Disconnect</button>
   </div>
+
+  <Footer />
 </template>
 
 <script setup>
@@ -74,12 +85,40 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { jwtDecode } from 'jwt-decode';
+import api from "@/api";
+import { useResponsesStore } from "../stores/useResponsesStore.js";
+import Footer from './footer.vue'; 
 
+const responsesStore = useResponsesStore();
 
 
 const router = useRouter();
 const studentName = ref("Student"); // Nom par défaut si non trouvé
 const publications = ref([]);
+
+
+
+const AccessControl = (publication) => {
+  const now = new Date();
+  const startDate = new Date(publication.startingDate);
+  const endDate = new Date(publication.endDate);
+  
+  // Conditions d'accès
+ /*  if (now < startDate) {
+    return { disabled: true, message: "Test is not available yet." };
+  }
+
+  if (now > endDate) {
+    return { disabled: true, message: "Test is no longer available." };
+  }
+
+  if (publication.access === 'unique' && publication.attempts > 0) {
+    return { disabled: true, message: "You have already completed this test." };
+  }
+ */
+  return { disabled: false, message: "" }; // Test accessible
+};
+
 
 // Fonction pour récupérer les publications
 const fetchPublications = async () => {
@@ -96,6 +135,7 @@ const fetchPublications = async () => {
 
     console.log("Publications reçues :", response.data);
     publications.value = response.data; // Affecter les données aux publications
+    console.log(publications.value)
   } catch (error) {
     console.error("Erreur lors de la récupération des publications :", error);
   }
@@ -131,23 +171,44 @@ const isOpen = (publication) => {
 };
 
 // Redirige vers le TestRunner pour un test spécifique
-const goToTest = (publication) => {
-  const testId = publication.testId?._id || publication.testId; // Extraction de l'ID correct
-  const publicationId = publication._id; // ID de la publication
-  const groupId = publication.groupId?._id || publication.groupId; // Extraction de l'ID correct
+const goToTest = async (publication) => {
+  console.log(publication)
+  responsesStore.resetResponses();
 
-  //console.log("🔍 Navigation vers le test avec :", { testId, publicationId, groupId });
+  const testId = publication.testId?._id || publication.testId;
+  const publicationId = publication._id;
+  const groupId = publication.groupId?._id || publication.groupId;
 
   if (!testId || !publicationId || !groupId) {
     console.error("❌ Erreur : Informations manquantes", { testId, publicationId, groupId });
     return;
   }
 
-  const route = `/test-runner?testId=${testId}&publicationId=${publicationId}&groupId=${groupId}`;
-  //console.log("🚀 Redirection vers :", route);
+  try {
+    // ✅ Appel API pour incrémenter attempts via api.js
+    console.log(publicationId)
+    const response = await api.patch(`api/publications/${publicationId}/increment-attempts`);
 
-  router.push(route);
+    if (response.status === 200) {
+      console.log("✅ Tentative enregistrée :", response.data.publication);
+
+      // ✅ Mise à jour locale des publications
+      /* const updatedPublication = response.data.publication;
+      publications.value = publications.value.map(pub => 
+        pub._id === publicationId ? updatedPublication : pub
+      ); */
+
+      // ✅ Redirection vers le test après mise à jour
+      const route = `/test-runner?testId=${testId}&publicationId=${publicationId}&groupId=${groupId}`;
+      router.push(route);
+    } else {
+      console.error("⚠️ Erreur lors de l'incrémentation de attempts :", response);
+    }
+  } catch (error) {
+    console.error("❌ Erreur API :", error);
+  }
 };
+
 
 
 // Formatte une date au format lisible

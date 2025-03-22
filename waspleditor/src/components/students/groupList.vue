@@ -26,19 +26,13 @@
         <!-- Input for Filter Value -->
         <div class="col-md-4">
           <label for="filter-value" class="form-label">Value</label>
-          <input
-            id="filter-value"
-            ref="valueEl"
-            type="text"
-            class="form-control"
-            placeholder="Enter a value..."
-          />
+          <input id="filter-value" ref="valueEl" type="text" class="form-control" placeholder="Enter a value..." />
         </div>
         <div class="col-md-1 d-flex align-items-end">
-    <button id="filter-apply" class="btn btn-primary w-100 btn-sm mt-4" @click="updateFilter">
-        Apply
-    </button>
-</div>
+          <button id="filter-apply" class="btn btn-primary w-100 btn-sm mt-4" @click="updateFilter">
+            Apply
+          </button>
+        </div>
 
         <!-- Clear Filter Button -->
         <div class="col-md-1 d-flex align-items-end">
@@ -71,10 +65,10 @@ const groupTableEl = ref(null);
 let groupTable = null;
 
 const props = defineProps({
-    groups: {
-        type: Array,
-        required: true
-    }
+  groups: {
+    type: Array,
+    required: true
+  }
 });
 
 // Définir un événement pour émettre l'ID du groupe sélectionné
@@ -82,83 +76,141 @@ const emit = defineEmits(["group-selected"]);
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // Fonction pour récupérer les groupes
-async function fetchGroups() {
+async function fetchGroups({ page = 1, size = 10, sorters = [], filters = [] } = {}) {
   try {
-    const response = await axios.get(`${VITE_API_BASE_URL}/api/groups`);
-    loadTable(response.data);
+    console.log(`📡 Fetching groups - Page: ${page}, Size: ${size}, Sorters:`, sorters, "Filters:", filters); // Debug
+
+    const response = await axios.get(`${VITE_API_BASE_URL}/api/groups`, {
+      params: { page, size, sorters, filters }
+    });
+
+    if (!Array.isArray(response.data.groups)) {
+      console.error("❌ Erreur: la réponse API ne contient pas un tableau", response.data);
+      return { data: [], last_page: 1 };
+    }
+
+    return {
+      data: response.data.groups,
+      last_page: response.data.last_page
+    };
+
   } catch (error) {
-    console.error("Erreur lors de la récupération des groupes :", error);
+    console.error("❌ Erreur lors de la récupération des GROUPS!!! :", error);
+    return { data: [], last_page: 1 };
   }
 }
 
+
+
+
+
 // Fonction pour charger Tabulator
-function loadTable(data) {
-    if (groupTable) {
-        groupTable.setData(data); // Recharge les données si la table existe
-        return;
-    }
+function loadTable() {
+  if (groupTable) {
+    groupTable.setData(); // Recharge les données si la table existe
+    return;
+  }
 
-    groupTable = new Tabulator(groupTableEl.value, {
-      data: props.groups, // Charge les données des groupes
-        height: "auto",
-        layout: "fitColumns",
-        selectable: true,
-        columns: [
-            { title: "ID", field: "_id", width: 150 },
-            { title: "Group Name", field: "groupName" },
-            { title: "Institution", field: "institution" },
-            { title: "Students", field: "students.length" },
-            { title: "Location", field: "location" },
-            { title: "Zipcode", field: "zipCode" },
-            { title: "Grade", field: "grade" },
-            { title: "Sector", field: "sector" },
-            {
-                title: "Actions",
-                field: "actions",
-                hozAlign: "center",
-                formatter: () => `
-                    <button class="delete-btn" style="background:none;border:none;cursor:pointer;font-size:16px;">❌</button>
-                    <button class="edit-btn" style="background:none;border:none;cursor:pointer;font-size:16px;">
-                        <i class="fa fa-edit" title="Edit"></i>
-                    </button>
-                `,
-                cellClick: (e, cell) => {
-                    const target = e.target;
+  groupTable = new Tabulator(groupTableEl.value, {
+    pagination: true,
+    paginationMode: "remote", // Pagination distante
+    paginationSize: 10,
+    paginationSizeSelector: [10, 20, 50, 100],
+    paginationCounter: "rows",
 
-                    if (target.closest(".edit-btn")) {
-                        const groupData = cell.getRow().getData();
-                        emit("group-edit", groupData);
-                    }
+    ajaxURL: `${VITE_API_BASE_URL}/api/groups`, // URL de base de l'API
 
-                    if (target.closest(".delete-btn")) {
-                        const groupId = cell.getRow().getData()._id;
-                        deleteGroup(groupId);
-                    }
-                },
-            },
-        ],
-    });
+    // ✅ Construit dynamiquement l’URL avec les bons paramètres
+    ajaxURLGenerator: (url, config, params) => {
+      const page = params.page || 1;
+      const size = params.size || 10;
 
-    groupTable.on("rowClick", (e, row) => {
-        const groupId = row.getData()._id;
-        emit("group-selected", groupId);
-    });
+      const fullUrl = new URL(url);
+      fullUrl.searchParams.set("page", page);
+      fullUrl.searchParams.set("size", size);
+
+      // Tu peux aussi ajouter plus tard :
+      // fullUrl.searchParams.set("sorters", JSON.stringify(params.sorters));
+      // fullUrl.searchParams.set("filters", JSON.stringify(params.filters));
+
+      console.log("🔗 URL générée pour appel API :", fullUrl.toString());
+      return fullUrl.toString();
+    },
+
+    // ✅ Analyse la réponse de l’API
+    ajaxResponse: (url, params, response) => {
+      console.log("📊 Réponse API reçue :", response);
+
+      // Tabulator attend un objet { data: [], last_page: n }
+      return {
+        data: response.groups,
+        last_page: response.last_page
+      };
+    },
+
+    ajaxSorting: true,
+    ajaxFiltering: true,
+
+    height: "auto",
+    layout: "fitColumns",
+    selectable: true,
+
+    columns: [
+      { title: "ID", field: "_id", width: 150 },
+      { title: "Group Name", field: "groupName" },
+      { title: "Institution", field: "institution" },
+      { title: "Students", field: "students.length" },
+      { title: "Location", field: "location" },
+      { title: "Zipcode", field: "zipCode" },
+      { title: "Grade", field: "grade" },
+      { title: "Sector", field: "sector" },
+      {
+        title: "Actions",
+        field: "actions",
+        hozAlign: "center",
+        formatter: () => `
+          <button class="delete-btn" style="background:none;border:none;cursor:pointer;font-size:16px;">❌</button>
+          <button class="edit-btn" style="background:none;border:none;cursor:pointer;font-size:16px;">
+              <i class="fa fa-edit" title="Edit"></i>
+          </button>
+        `,
+        cellClick: (e, cell) => {
+          const target = e.target;
+
+          if (target.closest(".edit-btn")) {
+            emit("group-edit", cell.getRow().getData());
+          }
+
+          if (target.closest(".delete-btn")) {
+            const groupId = cell.getRow().getData()._id;
+            deleteGroup(groupId);
+          }
+        },
+      },
+    ],
+  });
+
+  groupTable.on("rowClick", (e, row) => {
+    const groupId = row.getData()._id;
+    emit("group-selected", groupId);
+  });
 }
+
 
 
 // Fonction pour appliquer un filtre
 function updateFilter() {
-    const filterField = fieldEl.value.value;
-    const filterType = typeEl.value.value;
-    const filterValue = valueEl.value.value;
+  const filterField = fieldEl.value.value;
+  const filterType = typeEl.value.value;
+  const filterValue = valueEl.value.value;
 
-    console.log("Applying filter:", { filterField, filterType, filterValue }); // Log pour vérifier les valeurs
+  console.log("Applying filter:", { filterField, filterType, filterValue }); // Log pour vérifier les valeurs
 
-    if (filterField && filterType && filterValue) {
-        groupTable.setFilter(filterField, filterType, filterValue);
-    } else {
-        console.warn("Filter not applied: missing field, type, or value");
-    }
+  if (filterField && filterType && filterValue) {
+    groupTable.setFilter(filterField, filterType, filterValue);
+  } else {
+    console.warn("Filter not applied: missing field, type, or value");
+  }
 }
 
 
@@ -168,7 +220,7 @@ async function deleteGroup(groupId) {
   try {
     await axios.delete(`${VITE_API_BASE_URL}/api/groups/${groupId}`);
     alert("Group deleted successfully");
-    fetchGroups(); // Rechargez les données après suppression
+    groupTable.setPage(1);// Rechargez les données après suppression
   } catch (error) {
     console.error("Erreur lors de la suppression du groupe :", error.message);
     alert("Failed to delete group. Please try again.");
@@ -186,18 +238,17 @@ function clearFilter() {
 
 // Charger les données lors du montage
 onMounted(() => {
-  //fetchGroups();
-  loadTable(props.groups); 
+  loadTable();
 });
 
 // Surveillance des changements de données
-watch(
-    () => props.groups,
-    (newGroups) => {
-        if (groupTable) {
-            groupTable.setData(newGroups); // Recharge les données dans la table
-        }
-    },
-    { deep: true } // Nécessaire pour surveiller les changements profonds dans un tableau
-);
+/* watch(
+  () => props.groups,
+  (newGroups) => {
+    if (groupTable) {
+      groupTable.setData(newGroups); // Recharge les données dans la table
+    }
+  },
+  { deep: true } // Nécessaire pour surveiller les changements profonds dans un tableau
+); */
 </script>

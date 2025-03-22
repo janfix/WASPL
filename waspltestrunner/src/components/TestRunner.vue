@@ -68,6 +68,7 @@
       </div>
     </div>
   </div>
+  <Footer />
 </template>
 
 <script setup>
@@ -81,6 +82,7 @@ import { useResponsesStore } from '../stores/useResponsesStore.js';
 import LastPage from './LastPage.vue';
 import topnavbar from './topnavbar.vue';
 import TestMap from './TestMap.vue';
+import Footer from '../views/footer.vue'; // Ajuste le chemin selon ton projet
 
 
 const responsesStore = useResponsesStore(); // Importer le store
@@ -199,22 +201,43 @@ const canNavigateBack = computed(() =>
 );
 const canNavigateNext = computed(() => true);
 
+
 // ✅ Fonction de fin de test
 async function afterTest() {
   stopTimer.value = true;
   testOpen.value = false;
   sendResultsToDatabase();
-  lastPageChanger()
+  lastPageChanger();
 
   if (!sessionId.value) return console.error("❌ Impossible de terminer la session.");
 
   try {
-    await api.post("api/sessions/end", { sessionId: sessionId.value, abandoned: false });
+    // ✅ Clôturer la session normalement
+    await api.post("/api/sessions/end", { sessionId: sessionId.value, abandoned: false });
     console.log("✅ Session clôturée :", sessionId.value);
+
+    // ✅ Incrémenter attempts dans la publication
+    await incrementPublicationAttempts();
   } catch (error) {
     console.error("❌ Erreur lors de la clôture de la session :", error);
   }
 }
+
+// ✅ Fonction pour incrémenter attempts dans la publication
+async function incrementPublicationAttempts() {
+  if (!route.query.publicationId) {
+    return console.error("❌ Impossible d'incrémenter attempts : publicationId manquant.");
+  }
+
+  try {
+    await api.patch(`/api/publications/${route.query.publicationId}/increment-attempts`);
+    console.log("✅ Tentative enregistrée pour la publication :", route.query.publicationId);
+  } catch (error) {
+    console.error("❌ Erreur lors de l'incrémentation de attempts :", error);
+  }
+}
+
+
 
 // Méthodes
 

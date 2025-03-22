@@ -33,6 +33,10 @@ const publicationSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  attempts: {
+    type: Number,
+    required: true
+  },
   reports: {
     studentReport: {
       type: Boolean,

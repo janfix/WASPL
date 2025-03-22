@@ -20,15 +20,28 @@ router.post('/', async (req, res) => {
 // READ : Récupérer toutes les publications
 router.get('/', async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const size = parseInt(req.query.size) || 10;
+
+    const total = await Publication.countDocuments();
+
     const publications = await Publication.find()
-      .populate('testId', 'title') // Optionnel : Récupérer les titres des tests associés
-      .populate('groupId', 'groupName'); // Optionnel : Récupérer les noms des groupes associés
-    res.status(200).json(publications);
+      .skip((page - 1) * size)
+      .limit(size)
+      .populate('testId', 'title')
+      .populate('groupId', 'groupName');
+
+    res.status(200).json({
+      data: publications,
+      last_page: Math.ceil(total / size),
+      total, // optionnel mais utile pour la pagination
+    });
   } catch (err) {
     console.error('Erreur lors de la récupération des publications :', err.message);
     res.status(500).json({ error: 'Erreur lors de la récupération des publications.' });
   }
 });
+
 
 // READ : Récupérer une publication par son ID
 router.get('/:id', async (req, res) => {

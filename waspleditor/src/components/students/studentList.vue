@@ -63,52 +63,52 @@
 
 
 
-<!-- Fenêtre modale pour afficher les détails de l'étudiant -->
-<div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="studentModalLabel">Détails de l'étudiant</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="mb-3">
-            <label class="form-label">Prénom</label>
-            <input type="text" class="form-control" v-model="selectedStudent.firstname" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Nom</label>
-            <input type="text" class="form-control" v-model="selectedStudent.lastname" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-control" v-model="selectedStudent.email" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Institution</label>
-            <input type="text" class="form-control" v-model="selectedStudent.institution" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Spécialité</label>
-            <input type="text" class="form-control" v-model="selectedStudent.sector" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Niveau</label>
-            <input type="text" class="form-control" v-model="selectedStudent.grade" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Localisation</label>
-            <input type="text" class="form-control" v-model="selectedStudent.location" readonly>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-      </div>
+    <!-- Fenêtre modale pour afficher les détails de l'étudiant -->
+    <div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="studentModalLabel">Détails de l'étudiant</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Prénom</label>
+                            <input type="text" class="form-control" v-model="selectedStudent.firstname" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nom</label>
+                            <input type="text" class="form-control" v-model="selectedStudent.lastname" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" v-model="selectedStudent.email" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Institution</label>
+                            <input type="text" class="form-control" v-model="selectedStudent.institution" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Spécialité</label>
+                            <input type="text" class="form-control" v-model="selectedStudent.sector" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Niveau</label>
+                            <input type="text" class="form-control" v-model="selectedStudent.grade" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Localisation</label>
+                            <input type="text" class="form-control" v-model="selectedStudent.location" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
 
 
@@ -139,6 +139,7 @@ const props = defineProps({
         default: null,
     },
 });
+let defaultPageSize = 20;
 
 const selectedStudent = ref({}); // Étudiant sélectionné
 let studentModal = null; // Stocke la modale Bootstrap
@@ -159,26 +160,47 @@ function resetGroupFilter() {
 
 // Fonction pour afficher la modale avec les infos de l'étudiant
 const showStudentModal = (student) => {
-  selectedStudent.value = { ...student }; // Stocker les infos de l'étudiant sélectionné
+    selectedStudent.value = { ...student }; // Stocker les infos de l'étudiant sélectionné
 
-  if (!studentModal) {
-    studentModal = new Modal(document.getElementById("studentModal"));
-  }
-  studentModal.show();
+    if (!studentModal) {
+        studentModal = new Modal(document.getElementById("studentModal"));
+    }
+    studentModal.show();
 };
 
+const isLoading = ref(false);
 
 // Fonction pour récupérer les données depuis l'API
-async function fetchItems(groupId = null) {
+async function fetchItems(page = 1, size = 20, groupId = null) {
+    let response="";
+    if (isLoading.value) return;
+    isLoading.value = true;
     try {
-        let url = `${VITE_API_BASE_URL}/api/students`;
+        let url = `${VITE_API_BASE_URL}/api/students?page=${page}&size=${size}`;
         if (groupId) {
-            url += `?groupId=${groupId}`; // Ajoutez un paramètre de filtre si un groupe est sélectionné
+            url += `&groupId=${groupId}`;
+            console.log(groupId)
+            console.log("Fetching with size:", size, "page:", page);
+            response = await axios.get(url);
+            console.log("Réponse de l'API :", response.data);
+        } else{
+            console.log("NO GROUP SPECIFIED")
+            console.log("Fetching with size:", size, "page:", page);
+            response = await axios.get(url);
+            console.log("Réponse de l'API :", response.data);
         }
-        const response = await axios.get(url);
-        loadTable(response.data); // Chargez les données dans le tableau
+                
+        if (response.data.students && Array.isArray(response.data.students)) {
+            studentTable.value.setData(response.data.students);
+            studentTable.value.setMaxPage(response.data.totalPages);
+            console.log("Total étudiants :", response.data.totalStudents);
+        }else {
+            console.error("Format de réponse incorrect :", response.data);
+        }
     } catch (error) {
         console.error("Erreur lors de la récupération des étudiants :", error);
+    } finally {
+        isLoading.value = false;  // Assurez-vous de réinitialiser le drapeau
     }
 }
 
@@ -191,10 +213,30 @@ function loadTable(data) {
     }
 
     studentTable.value = new Tabulator(studTableEl.value, {
-        data, // Données récupérées
-        height: "auto",
+        pagination: "remote",
+        paginationSize: 20,
+        paginationSizeSelector: [10, 20, 50, 100],
+        paginationCounter: "rows",
+        ajaxConfig: {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        },
+        ajaxLoaderLoading: "<div class='loader'>Chargement...</div>",
+        ajaxRequesting: function (url, params) {
+            // Retourne true pour permettre la requête
+            return !isLoading.value;
+        },
+        ajaxResponse: function(url, params, response) {
+            console.log("Données reçues par Tabulator :", response); // ✅ Vérification API
+            return {
+                data: response.students, // Les étudiants
+                last_page: response.totalPages, // Nombre total de pages
+            };
+        },
+        
         layout: "fitColumns",
-        selectable: true,
         columns: [
             { title: "ID", field: "_id", width: 150 },
             { title: "Firstname", field: "firstname" },
@@ -206,36 +248,7 @@ function loadTable(data) {
             { title: "Grade", field: "grade" },
             { title: "Location", field: "location" },
             { title: "Zip Code", field: "zipcode" },
-            {
-                title: "Actions",
-                field: "actions",
-                hozAlign: "center",
-                formatter: () => `
-             <button class="action-btn preview-btn" style="background:none;border:none;cursor:pointer;font-size:18px;padding:2px;">🔍</button>
-             <button class="action-btn edit-btn" style="background:none;border:none;cursor:pointer;font-size:18px;padding:2px;">✏️</button>
-             <button class="action-btn delete-btn" style="background:none;border:none;cursor:pointer;font-size:18px;padding:2px;">❌</button>
-           `,
-           cellClick: (e, cell) => {
-        const rowData = cell.getRow().getData(); // Récupérer les données de la ligne
-        const target = e.target;
-
-        if (target.classList.contains("preview-btn")) {
-            console.log("Preview clicked for:", rowData);
-            showStudentModal(rowData);
-        } else if (target.classList.contains("edit-btn")) {
-            console.log("Edit clicked for:", rowData);
-        } else if (target.classList.contains("delete-btn")) {
-            console.log("Delete clicked for:", rowData);
-            deleteStudent(rowData._id, cell);
-        }
-    },
-            },
-
         ],
-        rowFormatter: (row) => {
-            row.getElement().classList.remove("tabulator-row-odd");
-            row.getElement().classList.remove("tabulator-row-even");
-        },
     });
 
     fieldEl.value.addEventListener("change", updateFilter);
@@ -249,23 +262,23 @@ function loadTable(data) {
             return; // Ignorer si ce n'est pas l'instance concernée
         }
 
-         // Vérifier si le clic est sur un bouton d'action
-    if (e.target.closest(".action-btn")) {
-        return; // Ne rien faire si un bouton a été cliqué
-    }
+        // Vérifier si le clic est sur un bouton d'action
+        if (e.target.closest(".action-btn")) {
+            return; // Ne rien faire si un bouton a été cliqué
+        }
 
 
         // Supprimer la sélection de toutes les lignes
-       /*  studentTable.getRows().forEach((tableRow) => {
-            const element = tableRow.getElement();
-            element.classList.remove("tabulator-selected");
-            element.style.backgroundColor = "";
-            element.style.color = "";
-        }); */
+        /*  studentTable.getRows().forEach((tableRow) => {
+             const element = tableRow.getElement();
+             element.classList.remove("tabulator-selected");
+             element.style.backgroundColor = "";
+             element.style.color = "";
+         }); */
 
         // Ajouter la sélection à la ligne cliquée
         //const element = row.getElement();
-       // element.classList.add("tabulator-selected");
+        // element.classList.add("tabulator-selected");
 
         // Récupérer les données de la ligne sélectionnée
         const item = row.getData();
@@ -298,9 +311,9 @@ const deleteStudent = async (studentId, cell) => {
 };
 
 // Fonction pour émettre un événement avec l'item sélectionné
-function emitItemSelected(item) {
-    console.log("Item reçu dans itemBank :", item);
-    const event = new CustomEvent('select-item', { detail: item });
+function emitItemSelected(student_selected) {
+    console.log("Student Selected :", student_selected);;
+    const event = new CustomEvent('select-item', { detail: student_selected });
     studTableEl.value.dispatchEvent(event);
 }
 // Formatteur pour les mots-clés
@@ -335,7 +348,7 @@ function clearFilter() {
 
 // Filtrer les étudiants par groupe sélectionné
 function filterStudentsByGroup(groupId) {
-    if (!studentTable.value) return;
+    if (!studentTable.value || isLoading.value) return;
 
     // Si un groupe est sélectionné, appliquez le filtre
     if (groupId) {
@@ -354,7 +367,7 @@ async function deleteAllStudents() {
     try {
         await axios.delete(`${VITE_API_BASE_URL}/api/students`);
         alert("All students deleted successfully");
-        fetchStudents(); // Rechargez les données après suppression
+        fetchItems();  // Utilisez fetchItems au lieu de fetchStudents
     } catch (error) {
         console.error("Erreur lors de la suppression des étudiants :", error);
         alert("Failed to delete all students. Please try again.");
@@ -365,14 +378,19 @@ async function deleteAllStudents() {
 watch(
     () => props.filterGroupId,
     (newGroupId) => {
-        console.log("Filtrer les étudiants pour le groupe :", newGroupId); // Log pour debug
-        fetchItems(newGroupId); // Recharger les étudiants du groupe sélectionné
+        console.log("Filtrer les étudiants pour le groupe :", newGroupId);
+        if (!isLoading.value) {
+            const totalStudents = studentTable.value.getDataCount();
+            fetchItems(1, defaultPageSize, newGroupId);  // Spécifiez la page et la taille
+        }
     }
 );
 
 
 onMounted(() => {
+    loadTable([]);
     fetchItems();
+    
     studTableEl.value.setAttribute("data-table-id", tableId);
     studTableEl.value.addEventListener("select-item", (event) => {
         const item = event.detail;

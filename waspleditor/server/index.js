@@ -10,9 +10,10 @@ import groupRoutes from "./routes/groupRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import resultRoutes from "./routes/resultRoutes.js";
 import publicationRoutes from "./routes/publicationRoutes.js";
+import userRoutes from './routes/userRoutes.js';
 import { Element } from "./models/itemModel.js";
-
 import authRoutes from './routes/auth.js';
+import authMiddleware from './middleware/authMiddleware.js';
 
 const app = express();
 // === Middleware ===
@@ -24,7 +25,7 @@ app.use(
     origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"], 
   })
 );
 
@@ -52,6 +53,7 @@ app.use("/api/groups", groupRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/publications", publicationRoutes);
 app.use("/api/results", resultRoutes);
+app.use('/api/users', userRoutes);
 
 
 

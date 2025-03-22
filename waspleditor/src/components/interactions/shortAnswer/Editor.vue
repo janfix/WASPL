@@ -188,12 +188,12 @@ onMounted(() => {
     }
 
     quillInstance.on('text-change', () => {
-
-      if (props.isItemBank) {
+     
+      /* if (props.isItemBank) {
         alert("Voulez-vous modifier cet élément dans l'Item Bank ?");
         console.log("isItemBank is true. Skipping store.updateElement.");
         return;
-      }
+      } */
 
       if (selectedElement.value) {
         selectedElement.value.el_RichText = quillInstance.root.innerHTML

@@ -19,9 +19,12 @@ export const useResponsesStore = defineStore('responses', {
     // Vérifier si une question est répondue
     isQuestionAnswered: (state) => (questionId) => {
       return state.responses.some((response) => response.questionId === questionId && response.answered);
-    },
+    }
   },
   actions: {
+    resetResponses() {  // ✅ Fonction pour réinitialiser les réponses
+      this.responses = [];
+    },
     // Ajouter ou mettre à jour une réponse
     saveResponse(response) {
       console.log('Réponse enregistrée :', response); 
@@ -65,4 +68,7 @@ export const useResponsesStore = defineStore('responses', {
       }
     },
   },
+  
 });
+
+

@@ -187,8 +187,14 @@ const callAPI = async () => {
                 console.error("Invalid result type: Expected an object or an array.");
             }
 
-            store.saveTestDataToDatabase()
-            return;
+
+            try {
+                await store.saveTestDataToDatabase();
+                return;
+            } catch (error) {
+                console.error("❌ Erreur lors de la sauvegarde :", error);
+            }
+
         }
 
         // Étape 1 : Génération du texte avec température 0.5

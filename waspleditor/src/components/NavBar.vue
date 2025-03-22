@@ -1,37 +1,44 @@
 <template>
-    <BNavbar variant="success" bg="info"  class="Waspl-bar">
+    <BNavbar variant="success" bg="info" class="Waspl-bar">
         <BNavbarBrand style="color:azure" href="#">
-            <img
-                src="../assets/waspl.png"
-                width="100"
-                class="d-inline-block align-top"
-                alt="WASPL"  />
+            <img src="../assets/waspl.png" width="100" class="d-inline-block align-top" alt="WASPL" />
         </BNavbarBrand>
         <div class="WasplConnect">
             <div class="dropdown text-end waspluser">
-          <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-            <font-awesome-icon :icon="['fas', 'circle-user']"  class="topBarIcon"/>
-          </a>
-          <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
-            <li><a class="dropdown-item" href="#">Settings</a></li>
-            <li><a class="dropdown-item" href="#">Profile</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a @click="logout" class="dropdown-item" href="#">Sign out</a></li>
-          </ul>
-        </div>
+                <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <font-awesome-icon :icon="['fas', 'circle-user']" class="topBarIcon" />
+                </a>
+                <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
+                    <li hidden><a class="dropdown-item" href="#">Settings</a></li>
+                    <li><a class="dropdown-item" @click="profileModal.openModal" href="#">Profile</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a @click="logout" class="dropdown-item" href="#">Sign out</a></li>
+                </ul>
+            </div>
 
-    </div>
+        </div>
     </BNavbar>
+    <ProfileModal ref="profileModal" />
 </template>
 
 
 <script setup>
-import { useRouter } from 'vue-router'
-const router = useRouter()
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/userStore';
+import ProfileModal from '@/components/ProfileModal.vue';
+
+const router = useRouter();
+const userStore = useUserStore();
+const profileModal = ref(null);
 
 const logout = () => {
-  localStorage.removeItem('token')
-  router.push('/login')
+    userStore.logout();
+    localStorage.removeItem('token')
+    router.push('/login')
 }
 </script>
 
@@ -41,33 +48,38 @@ const logout = () => {
     font-size: 24px;
     color: white;
 }
-.Waspl-bar{
+
+.Waspl-bar {
     padding-top: 10px;
     color: white;
 }
 
-.topBarIcon{
+.topBarIcon {
     color: white;
-   font-size: 1.5em;
-   margin-left : 10px
+    font-size: 1.5em;
+    margin-left: 10px
 }
 
 .WasplConnect {
-   
+
     inset: 0px auto auto 0px;
     margin: 0px;
 }
+
 .dropdown-menu.show {
     display: block;
 }
+
 .text-small {
     font-size: 85%;
 }
+
 .shadow {
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
 }
+
 .dropdown-menu {
-   
+
     position: absolute;
     z-index: 1000;
     display: none;
@@ -83,5 +95,4 @@ const logout = () => {
     border: 1px solid rgba(0, 0, 0, .15);
     border-radius: .25rem;
 }
-
 </style>

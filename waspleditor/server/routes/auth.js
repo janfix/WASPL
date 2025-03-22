@@ -18,7 +18,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username: req.body.username }).select("+password");
     
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
@@ -29,9 +29,10 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid password' });
     }
 
+    // 📌 Correction : Utiliser `id` au lieu de `userId`
     const token = jwt.sign(
-      { userId: user._id },
-      'your-secret-key',
+      { id: user._id },  // Modification ici
+      process.env.JWT_SECRET,  // 📌 Utilisation d'une variable d'environnement
       { expiresIn: '1h' }
     );
 

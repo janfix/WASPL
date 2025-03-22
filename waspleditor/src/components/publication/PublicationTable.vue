@@ -14,35 +14,47 @@ import { onMounted } from "vue";
 // Définir un événement pour émettre l'ID du groupe sélectionné
 const emit = defineEmits(["publication-selected"]);
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-async function fetchPublications() {
+let table = null;
+
+async function fetchPublications(url, config, params = {}) {
   try {
-    const response = await axios.get(`${VITE_API_BASE_URL}/api/publications`);
-    console.log("Données récupérées :", response.data);
+    const { page, size, sorters, filters } = params;
+
+    const response = await axios.get(`${VITE_API_BASE_URL}/api/publications`, {
+      params: {
+        page,
+        size,
+        // tu peux ajouter le support du tri et des filtres plus tard ici
+      }
+    });
 
     const today = new Date();
-    const publications = response.data.map((pub) => {
+    const publications = response.data.data.map(pub => {
       const startingDate = new Date(pub.startingDate);
       const endDate = new Date(pub.endDate);
-
-      // Ajouter une mention de statut en fonction de la date
       let status = "Coming";
-      if (today >= startingDate && today <= endDate) {
-        status = "Open";
-      } else if (today > endDate) {
-        status = "Close";
-      }
+      if (today >= startingDate && today <= endDate) status = "Open";
+      else if (today > endDate) status = "Close";
 
       return {
         ...pub,
-        status, // Ajouter le statut dans chaque élément
+        status
       };
     });
 
-    createTable(publications);
+    return {
+      data: publications,
+      last_page: response.data.last_page
+    };
+
   } catch (error) {
     console.error("Erreur lors de la récupération des publications :", error);
+    return { data: [], last_page: 1 };
   }
+
+  
 }
+
 
 async function deletePublication(publicationId) {
   if (!confirm("Are you sure you want to delete this publication?")) return;
@@ -50,7 +62,7 @@ async function deletePublication(publicationId) {
   try {
     await axios.delete(`${VITE_API_BASE_URL}/api/publications/${publicationId}`);
     alert("Publication deleted successfully!");
-    fetchPublications(); // Rafraîchir la table après suppression
+    table.setPage(1);// recharge la 1ère page (ou current page si tu veux)
   } catch (error) {
     console.error("Error deleting publication:", error.response?.data || error.message);
     alert("An error occurred while deleting the publication.");
@@ -59,8 +71,16 @@ async function deletePublication(publicationId) {
 
 
 function createTable(data) {
-  const table = new Tabulator("#publication-table", {
-    data,
+  table = new Tabulator("#publication-table", {
+    pagination: true,
+    paginationMode: "remote",
+    paginationSize: 10,
+    paginationSizeSelector: [10, 20, 50, 100],
+    paginationCounter: "rows",
+    ajaxURL: `${VITE_API_BASE_URL}/api/publications/`,
+    ajaxRequestFunc: fetchPublications,
+    ajaxFiltering: true,
+    ajaxSorting: true,
     layout: "fitColumns",
     columns: [
       { title: "Publication Name", field: "publicationName", widthGrow: 2 },
@@ -114,7 +134,10 @@ function createTable(data) {
 }
 
 // Appeler fetchPublications lorsque le composant est monté
-onMounted(fetchPublications);
+onMounted(() => {
+  createTable(); // C'est cette ligne qui est nécessaire pour lancer Tabulator
+});
+
 </script>
 
 <style scoped>

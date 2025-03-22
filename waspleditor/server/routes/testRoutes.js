@@ -15,14 +15,61 @@ router.get('/list', async (req, res) => {
 });
 
 // Récupérer tous les tests
+
 router.get('/getTests', async (req, res) => {
+  console.log("getTests Route is OK");
+
   try {
-    const tests = await Test.find();
-    res.status(200).json(tests);
+    const page = parseInt(req.query.page) || 1;
+    const size = parseInt(req.query.size) || 10;
+    const skip = (page - 1) * size;
+
+    const filter = req.query.filter || '';
+    const regex = new RegExp(filter, 'i');
+    const sortField = req.query.sortField;
+    const sortDir = req.query.sortDir === 'desc' ? -1 : 1;
+
+    const query = filter
+      ? {
+          $or: [
+            { title: regex },
+            { Subject: regex },
+            { level: regex },
+            { "metadata.Created": regex },
+            { "metadata.LastModif": regex }
+          ]
+        }
+      : {};
+
+    // ✅ Construction du tri
+    let sort = { "metadata.Created": -1 }; // tri par défaut
+    if (sortField) {
+      sort = {};
+      sort[sortField] = sortDir;
+    }
+
+    // 🔍 Récupération filtrée, paginée et triée
+    const tests = await Test.find(query)
+      .skip(skip)
+      .limit(size)
+      .sort(sort);
+
+    const totalTests = await Test.countDocuments(query);
+
+    res.status(200).json({
+      tests: tests || [],
+      totalPages: Math.ceil(totalTests / size),
+      totalItems: totalTests,
+    });
   } catch (err) {
+    console.error("❌ Erreur dans getTests :", err.message);
     res.status(500).json({ error: err.message });
   }
 });
+
+
+
+
 
 // Ajouter un nouveau test
 router.post('/addTest', async (req, res) => {

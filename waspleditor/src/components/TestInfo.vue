@@ -246,7 +246,7 @@
                     @change="updateTestData({ settings: testInfo.settings })" v-model="testInfo.settings.shufflePages">
                   <label class="form-check-label" for="settingShufflePages">Shuffle pages</label>
                 </div>
-                <div class="form-check form-switch">
+                <div hidden class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" id="settingFeedback"
                     @change="updateTestData({ settings: testInfo.settings })"
                     v-model="testInfo.settings.feedbackAllowed">

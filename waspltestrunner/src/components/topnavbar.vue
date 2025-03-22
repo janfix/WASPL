@@ -29,7 +29,7 @@
                             <li>Test_id:{{ testData._id }}</li>
                             <li>Modif: {{testData.metadata}}</li>
                              <!--<li>items: {{testData.elements.length}}</li>-->
-                            <li>duration: {{testData.duration}}</li>
+                             <li >duration: {{testData.duration}}</li>
                             <li>Preset: {{testData.preset}}</li>
                             <li>Navigation: {{testData.navigation}}</li> 
                             <li></li>
@@ -51,8 +51,14 @@
                     </li>
 
                 </ul>
-                <a class="candidate" href="#">Remaining Time : {{ formattedTime || "00:00" }} <div class="spinner">⏳</div></a>
 
+                                
+                <a v-if="(testData.settings?.timeLimit)" class="candidate" href="#">
+                    
+                    Remaining Time: {{ formattedTime || "00:00" }} 
+                    <div class="spinner">⏳</div>
+                </a>
+                
 
                 <div class="dropdown text-end">
           <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1"

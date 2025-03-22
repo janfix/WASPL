@@ -148,12 +148,12 @@ export default {
         try {
             // Récupérer les tests
             const testResponse = await axios.get(`${VITE_API_BASE_URL}/api/tests/list`);
-            console.log('Tests:', testResponse.data);
+            //console.log('Tests:', testResponse.data);
             this.tests = testResponse.data;
 
             // Récupérer les groupes
             const response = await axios.get(`${VITE_API_BASE_URL}/api/groups/list`);
-            console.log('Groups:', response.data);
+            //console.log('Groups:', response.data);
             this.groups = response.data;
         } catch (error) {
             console.error('Failed to fetch tests or groups', error);
@@ -169,6 +169,7 @@ export default {
         endDate: document.getElementById('endDate').value,
         access: document.getElementById('access').value,
         description: document.getElementById('PubDescription').value,
+        attempts: 0,
         reports: {
             studentReport: document.getElementById('StudentReport').checked,
             groupReport: document.getElementById('GroupReport').checked,
@@ -177,6 +178,7 @@ export default {
     };
 
     try {
+        console.log(publicationData)
         const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
         const response = await axios.post(`${VITE_API_BASE_URL}/api/publications`, publicationData); // URL complète
         alert('Publication added successfully');

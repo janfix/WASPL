@@ -24,11 +24,9 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, nextTick } from "vue";
+import { computed, ref, watch, onMounted, nextTick } from "vue";
 import axios from "axios";
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
-
-
 
 const props = defineProps({
   publication: {
@@ -56,14 +54,17 @@ const table = ref(null);
 const tabulatorTable = ref(null);
 const filterValue = ref("");
 
-// Récupération des données des étudiants
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+// Récupération des données des étudiants
 const fetchStudentSessions = async () => {
+  if (!props.publication._id) return [];
+  
   try {
     const response = await axios.get(
       `${VITE_API_BASE_URL}/api/publications/${props.publication._id}/student-sessions`
     );
-    return response.data; // Renvoie les données
+    return response.data;
   } catch (error) {
     console.error("❌ Error fetching student sessions:", error);
     return [];
@@ -76,11 +77,15 @@ const initializeTable = async () => {
 
   await nextTick(); // Assure que le DOM est mis à jour avant d'initialiser Tabulator
 
+  if (table.value) {
+    table.value.destroy(); // Détruire l'ancienne instance pour éviter les doublons
+  }
+
   table.value = new Tabulator(tabulatorTable.value, {
     data: studentSessions,
     layout: "fitColumns",
-    pagination: "local", // Active la pagination
-    paginationSize: 10, // 10 étudiants par page
+    pagination: "local",
+    paginationSize: 10,
     columns: [
       { title: "Student ID", field: "studentID", sorter: "string", headerFilter: "input" },
       { title: "Last Name", field: "lastName", sorter: "string", headerFilter: "input" },
@@ -92,21 +97,17 @@ const initializeTable = async () => {
   });
 };
 
-// Filtrage dynamique
-const applyFilter = () => {
-  if (table.value) {
-    table.value.setFilter([
-      { field: "lastName", type: "like", value: filterValue.value },
-      { field: "firstName", type: "like", value: filterValue.value },
-    ]);
-  }
-};
+// Surveiller les changements de publication et mettre à jour la table
+watch(() => props.publication, () => {
+  initializeTable();
+}, { deep: true, immediate: true });
 
 // Charger les données lorsque le composant est monté
 onMounted(() => {
   initializeTable();
 });
 </script>
+
 
 <style scoped>
 .timeInfo {

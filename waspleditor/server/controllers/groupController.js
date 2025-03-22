@@ -117,18 +117,45 @@ export const createGroup = async (req, res) => {
   
   // READ : Récupérer tous les groupes ou ceux d’un créateur spécifique
   export const getGroups = async (req, res) => {
-    const { creator } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const size = parseInt(req.query.size) || 10;
+    const sorters = req.query.sorters ? JSON.parse(req.query.sorters) : [];
+    const filters = req.query.filters ? JSON.parse(req.query.filters) : [];
   
     try {
-      const groups = creator
-        ? await Group.find({ creator }) // Groupes d’un créateur spécifique
-        : await Group.find(); // Tous les groupes
+      let query = {};
   
-      res.status(200).json(groups);
+      // Ajout des filtres
+      filters.forEach(filter => {
+        query[filter.field] = { $regex: filter.value, $options: "i" };
+      });
+  
+      // Définition du tri
+      let sortQuery = {};
+      sorters.forEach(sorter => {
+        sortQuery[sorter.field] = sorter.dir === "asc" ? 1 : -1;
+      });
+  
+      const totalGroups = await Group.countDocuments(query);
+      const groups = await Group.find(query)
+        .sort(sortQuery)
+        .skip((page - 1) * size)
+        .limit(size);
+
+      console.log(groups)  
+  
+      res.status(200).json({
+        groups,
+        total: totalGroups,
+        last_page: Math.ceil(totalGroups / size)
+      });
+  
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
   };
+  
+  
   
   // UPDATE : Mettre à jour un groupe existant
   export const updateGroup = async (req, res) => {

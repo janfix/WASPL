@@ -85,7 +85,11 @@ function loadTable(data) {
     data, // Données récupérées
     height: "500px",
     layout: "fitColumns",
-    selectable: true,
+    selectable: true, 
+    pagination:true,
+    paginationSize:10,
+    paginationSizeSelector: [5, 10, 20, 50, 100], 
+    paginationCounter:"rows",
     columns: [
       { title: "ID", field: "_id", width: 70 },
       { title: "Label", field: "el_Label", width: 200 },
