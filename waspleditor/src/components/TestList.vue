@@ -196,8 +196,8 @@ const initTable = () => {
     filterMode: "remote", 
     layout: "fitColumns",
     columns: [
-      { title: "Title", field: "title", sorter: "string", headerFilter: "input" },
-      { title: "Creation Date", field: "metadata.Created", sorter: "date", headerFilter: "input" },
+      { title: "Title", field: "title", sorter: "string" },
+      { title: "Creation Date", field: "metadata.Created", sorter: "date" },
       { title: "Elements", field: "elements.length", sorter: "number" },
       { title: "Last Modified", field: "metadata.LastModif", sorter: "date" },
       { title: "Subject", field: "Subject", sorter: "string" },
